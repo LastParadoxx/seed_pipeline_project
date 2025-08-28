@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+src/seed_pipeline/__init__.py
+src/seed_pipeline.egg-info/PKG-INFO
+src/seed_pipeline.egg-info/SOURCES.txt
+src/seed_pipeline.egg-info/dependency_links.txt
+src/seed_pipeline.egg-info/requires.txt
+src/seed_pipeline.egg-info/top_level.txt
+tests/test_normalize.py

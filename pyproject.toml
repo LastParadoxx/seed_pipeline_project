@@ -1,0 +1,26 @@
+[project]
+name = "seed_pipeline"
+version = "0.1.0"
+description = "Seed/Variation ingestion pipeline with API."
+authors = [{ name = "Ahmed Hammad", email = "ahmedhammad708@yahoo.com" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "SQLAlchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "click>=8.1.0",
+    "fastapi>=0.103.0",
+    "uvicorn>=0.22.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "factory-boy",
+]
+
+[tool.setuptools]
+packages = ["seed_pipeline"]
+package-dir = {"" = "src"}

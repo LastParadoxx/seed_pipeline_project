@@ -1,0 +1,251 @@
+Metadata-Version: 2.4
+Name: seed_pipeline
+Version: 0.1.0
+Summary: Seed/Variation ingestion pipeline with API.
+Author-email: Ahmed Hammad <ahmedhammad708@yahoo.com>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: SQLAlchemy>=2.0.0
+Requires-Dist: psycopg2-binary>=2.9.0
+Requires-Dist: click>=8.1.0
+Requires-Dist: fastapi>=0.103.0
+Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: python-dotenv>=1.0.0
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: factory-boy; extra == "test"
+
+# Seed Pipeline Project
+
+Built with **FastAPI**, **SQLAlchemy**, and **PostgreSQL**, with optional **Adminer** for database inspection.
+
+## 🚀 Prerequisites
+
+### Windows
+* [Docker Desktop](https://docs.docker.com/desktop/install/windows/) with **WSL2 integration enabled**
+* Python 3.11+ with `venv`
+* Git (optional)
+
+### Linux/macOS
+* [Docker Engine](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/desktop/)
+* Python 3.11+ with `venv`
+* Git (optional)
+* `make` (optional, for convenience commands)
+
+## 🛠 Setup Instructions
+
+### Windows Complete Setup
+
+#### 1. Clone & Enter Project
+
+```powershell
+cd seed_pipeline_project
+```
+
+#### 2. Create Virtual Environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+```
+
+#### 3. Install Dependencies
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -e .[test]
+```
+
+#### 4. Start Database
+
+```powershell
+docker compose up -d db
+```
+
+This runs **Postgres 16** mapped to host port **5433**.
+
+#### 5. Create Clean Database
+
+```powershell
+docker exec -it seed_pipeline_project-db-1 psql -U postgres -c "CREATE DATABASE seeddb_clean;"
+```
+
+#### 6. Initialize Database Tables
+
+```powershell
+$env:DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost:5433/seeddb_clean"
+python -c "import os; from sqlalchemy import create_engine; from seed_pipeline.db.models import Base; e=create_engine(os.environ['DATABASE_URL']); Base.metadata.create_all(e); print('Tables created in seeddb_clean.')"
+```
+
+#### 7. Ingest Sample Data
+
+```powershell
+python -m seed_pipeline.ingest.cli ingest --batch-name demo --adapter generic_responses_v1 --path .\samples
+```
+
+#### 8. Run the API
+
+```powershell
+uvicorn seed_pipeline.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+---
+
+### Linux/macOS Complete Setup
+
+#### 1. Clone & Enter Project
+
+```bash
+cd /path/to/your/seed_pipeline_project
+```
+
+#### 2. Create Virtual Environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+#### 3. Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e .[test]
+```
+
+**Alternative using Make:**
+
+```bash
+make setup  # Creates venv and installs dependencies
+```
+
+#### 4. Start Database
+
+```bash
+make db  # or: docker compose up -d db
+```
+
+This runs **Postgres 16** mapped to host port **5433**.
+
+#### 5. Create Clean Database
+
+```bash
+docker exec -it seed_pipeline_project-db-1 psql -U postgres -c "CREATE DATABASE seeddb_clean;"
+```
+
+#### 6. Initialize Database Tables
+
+```bash
+export DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5433/seeddb_clean"
+python -c "import os; from sqlalchemy import create_engine; from seed_pipeline.db.models import Base; e=create_engine(os.environ['DATABASE_URL']); Base.metadata.create_all(e); print('Tables created in seeddb_clean.')"
+```
+
+#### 7. Ingest Sample Data
+
+```bash
+python -m seed_pipeline.ingest.cli ingest --batch-name demo --adapter generic_responses_v1 --path ./samples
+```
+
+**Alternative using Make:**
+
+```bash
+make ingest ARGS="--batch-name demo --adapter generic_responses_v1 --path ./samples"
+```
+
+#### 8. Run the API
+
+```bash
+uvicorn seed_pipeline.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Alternative using Make:**
+
+```bash
+make api
+```
+
+## 📊 Expected Output
+
+After running the ingestion, you'll see output like:
+
+```
+Processed 1 file(s), skipped 0.
+Seeds: 15 new, 4788 existing.
+Variations: 1332 new, 3471 existing.
+Observations: 4803.
+Invalid records: 0.
+```
+
+## 🌐 API Access
+
+Once your API is running, it's available at:
+
+* **Interactive Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **Alternative Docs**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+* **API Base URL**: http://127.0.0.1:8000
+
+## 🔍 Inspect Database (Optional)
+
+Run **Adminer** inside the same Docker network:
+
+```bash
+docker run -d --name seed_adminer --network seed_pipeline_project_default -p 8081:8080 adminer
+```
+
+Log in at [http://localhost:8081](http://localhost:8081) with:
+
+* **System**: PostgreSQL
+* **Server**: seed\_pipeline\_project-db-1
+* **Username**: postgres
+* **Password**: postgres
+* **Database**: seeddb\_clean
+
+## 📡 API Examples
+
+Once your API is running, you can test it with these example requests:
+
+### Check if seeds exist
+```bash
+curl -X POST http://localhost:8000/seeds/exists \
+  -H "Content-Type: application/json" \
+  -d '{"seeds": ["Michael", "sarah"]}'
+```
+
+### Compare variations
+```bash
+curl -X POST http://localhost:8000/seeds/diff \
+  -H "Content-Type: application/json" \
+  -d '{"seed": "Michael", "variations": ["Mikel", "Micheal", "Mychal"]}'
+```
+
+## 📂 Project Structure
+
+```
+seed_pipeline_project/
+├── docker-compose.yml      # Postgres service config
+├── Makefile                # Convenience commands
+├── samples/                # Place JSON files here for ingestion
+├── src/seed_pipeline/
+│   ├── api/                # FastAPI routes
+│   ├── db/                 # Models & engine
+│   ├── ingest/             # CLI + ingestion logic
+│   └── ...
+└── README.md               # This file
+```
+
+## 🏭 Production Notes
+
+* Use `gunicorn` or `uvicorn --workers N` for multi-worker serving
+* Replace default Postgres password with a secret in `.env`
+* Mount `samples/` to external storage for large datasets (100GB+)
+* Add monitoring/logging (e.g., Prometheus, Grafana) in production
+
+## 📖 Features
+
+* **Database schema**: Uses PostgreSQL via SQLAlchemy 2.0. Tables are defined for seeds, variations, observations, miners, batches and source files. The schema enforces uniqueness constraints and indexes to support fast lookup.
+* **Deterministic normalisation**: Seed and variation strings are normalised (lowercased, stripped of accents, collapsed whitespace) and hashed so that semantically equivalent inputs map to the same row. This enables idempotent ingestion and easy deduplication.
+* **Pluggable adapters**: JSON source files can come in many formats. A registry of adapters converts arbitrary shapes into a canonical record (`seed`, `variation`, `miner_ext_id`, `score`, `raw`) which the core pipeline consumes. Adding support for a new format is a matter of implementing a new adapter module.
+* **Batch ingestion**: The `ingest_batch` function will read a collection of files, skip those that have already been processed, and update the database accordingly. A command line wrapper built on `click` is provided for convenience.
+* **REST API**: A small FastAPI application exposes endpoints to determine whether seeds exist and how many variations they have, and to classify candidate variations as either existing or new.
+
