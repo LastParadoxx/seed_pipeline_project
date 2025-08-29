@@ -84,7 +84,8 @@ cd /path/to/your/seed_pipeline_project
 
 #### 2. Create Virtual Environment
 
-```bash
+```bash 
+# make sure the venv package is installed. IF not, run :sudo apt update && sudo apt install -y python3-venv  # or python3.12-venv for Python 3.12
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -178,7 +179,7 @@ docker run -d --name seed_adminer --network seed_pipeline_project_default -p 808
 Log in at [http://localhost:8081](http://localhost:8081) with:
 
 * **System**: PostgreSQL
-* **Server**: seed\_pipeline\_project-db-1
+* **Server**: seed_pipeline_project-db-1
 * **Username**: postgres
 * **Password**: postgres
 * **Database**: seeddb\_clean
